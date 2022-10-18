@@ -1,0 +1,125 @@
+-- USERS TABLE --
+CREATE TABLE users(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	username VARCHAR(255),
+	created_at TIMESTAMP
+)
+
+-- PHOTOS TABLE
+CREATE TABLE photos(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	image_url VARCHAR(255),
+	user_id INT,
+	created_at TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+)
+-- COMMENTS TABLE --
+CREATE TABLE comments(
+	id INT AUTO_INCREMENT,
+	comment_text VARCHAR(255),
+	user_id INT,
+	photo_id INT,
+	created_at TIMESTAMP,
+	PRIMARY KEY (id, user_id, photo_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (photo_id) REFERENCES photos(id)
+)
+
+
+-- LIKES TABLE --
+CREATE TABLE likes(
+	photo_id INT,
+	user_id INT,
+	created_at TIMESTAMP,
+	PRIMARY KEY (user_id, photo_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (photo_id) REFERENCES photos(id)
+)
+
+CREATE TABLE tags(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	tag_name VARCHAR(255),
+	created_at TIMESTAMP
+)
+
+CREATE TABLE photo_tags(
+	photo_id INT,
+	tag_id INT,
+	PRIMARY KEY (tag_id, photo_id),
+	FOREIGN KEY (photo_id) REFERENCES photos(id),
+	FOREIGN KEY (tag_id) REFERENCES tags(id)
+)
+
+CREATE TABLE follows(
+	follower_id INT,
+	followee_id INT,
+	created_at TIMESTAMP,
+	PRIMARY KEY (follower_id , followee_id),
+	FOREIGN KEY (follower_id) REFERENCES users(id),
+	FOREIGN KEY (followee_id) REFERENCES users(id)
+	
+)
+
+-- ADD data USERS --
+INSERT INTO users(id, username, created_at) VALUES (1,'Messi', '2022-10-10'),
+(2,'Maradona', '2022-9-22'),
+(3,'Ronaldo', '2021-12-12'),
+(4,'Torres', '2022-03-11'),
+(5,'Pedri', '2022-10-12'),
+(6,'Neymar', '2022-10-08'),
+(7,'Suarez', '2022-06-30'),
+(8,'Ibrahimovic', '2022-10-03')
+
+-- ADD data Photos --
+INSERT INTO photos(id, image_url, user_id, created_at) VALUES 
+(1,'img1.jpg', 1, '2022-10-10'),
+(2,'img2.jpg', 2, '2022-10-11'),
+(3,'img3.jpg', 3, '2021-10-12'),
+(4,'img4.jpg', 1, '2022-10-13'),
+(5,'img5.jpg', 1, '2022-10-12'),
+(6,'img6.jpg', 6, '2022-10-08'),
+(7,'img7.jpg', 7, '2022-09-30'),
+(8,'img8.jpg', 8, '2022-10-10')
+
+-- ADD data LIkes --
+INSERT INTO likes(photo_id, user_id, created_at) VALUES 
+(1, 1, '2022-11-10'),
+(2, 5, '2022-10-14'),
+(3, 1, '2021-12-12'),
+(4, 4, '2022-10-22'),
+(5, 1, '2022-10-19')
+
+
+
+SELECT * 
+FROM photos
+
+SELECT *
+FROM photos JOIN users ON photos.id = users.id
+WHERE photos.user_id = '1'
+
+-- Năm người dùng sử dụng ứng dụng lâu nhất --
+SELECT * FROM users 
+ORDER BY CREATED_AT ASC LIMIT 5;
+
+--Người dùng không hoạt đông --
+SELECT users.id, users.username FROM users
+LEFT JOIN photos
+ON users.id = photos.user_id
+WHERE photos.user_id IS NULL;
+
+-- Ảnh có nhiều like nhất và người dùng tạo ra nó --
+
+-- Số lượng ảnh trung bình mỗi người --
+
+--Những người thich 1 bức ảnh
+SELECT user_id, COUNT(photo_id)
+FROM likes 
+GROUP BY user_id
+WHERE COUNT(photo_id) = 1
+
+
+SELECT likes.user_id, COUNT(likes.photo_id)
+FROM likes 
+GROUP BY likes.user_id
+WHERE COUNT(likes.photo_id) = NULL
