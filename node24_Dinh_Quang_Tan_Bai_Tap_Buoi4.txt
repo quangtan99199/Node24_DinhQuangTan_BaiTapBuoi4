@@ -89,10 +89,16 @@ INSERT INTO likes(photo_id, user_id, created_at) VALUES
 (4, 4, '2022-10-22'),
 (5, 1, '2022-10-19')
 
+-- ADD data Tag --
+INSERT INTO tags(id, tag_name, created_at) VALUES 
+(1, 'tag_1', '2022-11-28'),
+(2, 'tag_2', '2022-10-17'),
+(3, 'tag_3', '2021-12-01'),
+(4, 'tag_4', '2022-10-28'),
+(5, 'tag_5', '2022-10-13'),
+(6, 'tag_6', '2022-11-19'),
+(7, 'tag_7', '2022-10-07')
 
-
-SELECT * 
-FROM photos
 
 SELECT *
 FROM photos JOIN users ON photos.id = users.id
@@ -109,8 +115,23 @@ ON users.id = photos.user_id
 WHERE photos.user_id IS NULL;
 
 -- Ảnh có nhiều like nhất và người dùng tạo ra nó --
+WITH number_likes AS
+(
+SELECT photo_id,  COUNT(user_id) number_likes  FROM photos GROUP BY photo_id
+), 
+user_photo AS
+(SELECT photos.user_id, likes.photo_id FROM number_likes likes
+LEFT JOIN photo_id photos
+ON likes.photo_id = photos.id
+WHERE ROW_NUMBER() OVER(ORDER BY likes.number_like DESC)=1
+)
+-- SELECT id, user_name, photo_id FROM USERS_PHOTO P
+-- LEFT JOIN USER U
+-- ON P.USER_ID = U.ID
 
 -- Số lượng ảnh trung bình mỗi người --
+SELECT user_id,  AVG(id) number_photo FROM photos GROUP BY user_id
+
 
 --Những người thich 1 bức ảnh
 SELECT user_id, COUNT(photo_id)
@@ -118,8 +139,14 @@ FROM likes
 GROUP BY user_id
 WHERE COUNT(photo_id) = 1
 
+-- 5 người thường được HashTags --
+SELECT  photo_tags.tag_id, tags.tag_name FROM 
+(SELECT tag_id, COUNT(photo_id)
+FROM photo_tags GROUP BY tag_id
+ORDER BY COUNT(photo_id) DESC
+LIMIT 5 ) photo_tags
+LEFT JOIN tags
+ON tags.id = photo_tags.tag_id
 
-SELECT likes.user_id, COUNT(likes.photo_id)
-FROM likes 
-GROUP BY likes.user_id
-WHERE COUNT(likes.photo_id) = NULL
+
+
